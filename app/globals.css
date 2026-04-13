@@ -2,7 +2,12 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #111827;
+  --color-primary-dark: #0a1a14;
+  --color-primary-green: #1e3c2c;
+  --color-primary-light: #2d5a3f;
+  --color-gold: #d4af37;
+  --color-gold-light: #f5e6b8;
 }
 
 @theme inline {
@@ -12,15 +17,63 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  body {
+    @apply text-gray-900 bg-white antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-bold;
+  }
+
+  .font-heading {
+    font-family: var(--font-heading), ui-serif, Georgia, serif;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  .container-custom {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .section-padding {
+    @apply py-16 md:py-20 lg:py-24;
+  }
+
+  .card {
+    @apply bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden;
+  }
+
+  .btn-primary {
+    @apply bg-[#d4af37] text-[#1e3c2c] px-6 py-3 rounded-full font-semibold hover:bg-[#e6c85c] transition-all duration-300 hover:shadow-lg inline-flex items-center justify-center gap-2;
+  }
+
+  .btn-secondary {
+    @apply border-2 border-[#1e3c2c] text-[#1e3c2c] px-6 py-3 rounded-full font-semibold hover:bg-[#1e3c2c] hover:text-white transition-all duration-300 inline-flex items-center justify-center gap-2;
+  }
+
+  .btn-tertiary {
+    @apply border-2 border-white/30 text-white px-6 py-3 rounded-full font-semibold hover:border-[#d4af37] hover:bg-white/10 transition-all duration-300 inline-flex items-center justify-center gap-2;
+  }
+
+  .section-badge {
+    @apply text-[#d4af37] text-sm font-semibold uppercase tracking-wider;
+  }
+
+  .section-title {
+    @apply text-3xl md:text-4xl font-bold text-gray-900 mt-2 mb-3;
+  }
+
+  .section-subtitle {
+    @apply text-gray-600 max-w-2xl mx-auto;
+  }
+
+  .gold-underline {
+    @apply w-20 h-1 bg-[#d4af37] mx-auto mb-4;
+  }
 }
