@@ -98,9 +98,13 @@ export async function createPropertyFromForm(input: {
   video_url: string;
 }): Promise<Property> {
   try {
+    if (!input.image_url.trim()) {
+      throw new Error('Image is required');
+    }
+
     const { type, status } = categoryToDbFields(input.category);
     const priceDecimal = parsePriceToDecimal(input.price);
-    const images = input.image_url.trim() ? [input.image_url.trim()] : [];
+    const images = [input.image_url.trim()];
     const videos = input.video_url.trim() ? [input.video_url.trim()] : [];
 
     const [row] = await db
@@ -150,9 +154,13 @@ export async function updatePropertyFromForm(
       return null;
     }
 
+    if (!input.image_url.trim()) {
+      throw new Error('Image is required');
+    }
+
     const { type, status } = categoryToDbFields(input.category);
     const priceDecimal = parsePriceToDecimal(input.price);
-    const images = input.image_url.trim() ? [input.image_url.trim()] : [];
+    const images = [input.image_url.trim()];
     const videos = input.video_url.trim() ? [input.video_url.trim()] : [];
 
     const [row] = await db

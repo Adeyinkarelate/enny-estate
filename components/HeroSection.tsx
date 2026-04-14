@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Search, ArrowRight } from 'lucide-react';
@@ -64,10 +65,14 @@ export default function HeroSection() {
           <motion.div variants={fadeUp} className="hidden md:block">
             <div className="relative">
               <div className="absolute -inset-4 bg-[#d4af37]/25 rounded-3xl blur-2xl" aria-hidden="true" />
-              <img
+              <Image
                 src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=600&h=400&fit=crop"
                 alt="Luxury Property Nigeria"
+                width={600}
+                height={400}
                 className="relative rounded-2xl shadow-2xl w-full h-auto"
+                sizes="(min-width: 768px) 50vw, 600px"
+                priority
               />
             </div>
           </motion.div>

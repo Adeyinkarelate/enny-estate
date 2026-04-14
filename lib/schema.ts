@@ -37,6 +37,7 @@ export const properties = pgTable('properties', {
   type: propertyTypeEnum('type').notNull(),
   status: propertyStatusEnum('status').notNull().default('for_sale'),
   featured: boolean('featured').notNull().default(false),
+  /** Primary listing image URL(s); app requires at least one Cloudinary image on create/update. */
   images: text('images').array().notNull().default([]),
   videos: text('videos').array().notNull().default([]),
   amenities: text('amenities').array().notNull().default([]),

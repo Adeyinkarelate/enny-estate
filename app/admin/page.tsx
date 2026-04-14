@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { fadeUp, staggerContainer } from '@/lib/animations';
 import toast from 'react-hot-toast';
@@ -18,14 +18,9 @@ import {
   X,
 } from 'lucide-react';
 import PageHeroBanner from '@/components/PageHeroBanner';
-import { isEmptyOrCloudinaryHttpsUrl } from '@/lib/cloudinary-url';
-import type {
-  CloudinaryUploadApiResponse,
-  Inquiry,
-  Property,
-  PropertyCategory,
-  PropertyFormData,
-} from '@/types';
+import FileUpload from '@/components/ui/FileUpload';
+import { propertyFormSchema } from '@/lib/validation';
+import type { Inquiry, Property, PropertyCategory, PropertyFormData } from '@/types';
 
 const CATEGORIES: { value: PropertyCategory; label: string }[] = [
   { value: 'house for renting', label: 'House for renting' },
@@ -101,50 +96,6 @@ async function createProperty(data: PropertyFormData): Promise<Property> {
   return json.data;
 }
 
-async function uploadImageToCloudinary(file: File): Promise<string> {
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-  const preset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
-  if (!cloudName?.trim() || !preset?.trim()) {
-    throw new Error(
-      'Cloudinary is not configured. Set NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME and NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET.'
-    );
-  }
-  const body = new FormData();
-  body.append('file', file);
-  body.append('upload_preset', preset);
-  const response = await fetch(
-    `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-    { method: 'POST', body }
-  );
-  const json = (await response.json()) as CloudinaryUploadApiResponse;
-  if (!response.ok || !json.secure_url) {
-    throw new Error(json.error?.message ?? 'Cloudinary image upload failed');
-  }
-  return json.secure_url;
-}
-
-async function uploadVideoToCloudinary(file: File): Promise<string> {
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-  const preset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
-  if (!cloudName?.trim() || !preset?.trim()) {
-    throw new Error(
-      'Cloudinary is not configured. Set NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME and NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET.'
-    );
-  }
-  const body = new FormData();
-  body.append('file', file);
-  body.append('upload_preset', preset);
-  const response = await fetch(
-    `https://api.cloudinary.com/v1_1/${cloudName}/video/upload`,
-    { method: 'POST', body }
-  );
-  const json = (await response.json()) as CloudinaryUploadApiResponse;
-  if (!response.ok || !json.secure_url) {
-    throw new Error(json.error?.message ?? 'Cloudinary video upload failed');
-  }
-  return json.secure_url;
-}
-
 async function updateProperty(id: string, data: PropertyFormData): Promise<Property> {
   const response = await fetch(`/api/properties/${encodeURIComponent(id)}`, {
     method: 'PUT',
@@ -218,13 +169,6 @@ export default function AdminPage() {
     {}
   );
   const [submitting, setSubmitting] = useState(false);
-  const [pendingImageFile, setPendingImageFile] = useState<File | null>(null);
-  const [previewObjectUrl, setPreviewObjectUrl] = useState<string | null>(null);
-  const imageInputRef = useRef<HTMLInputElement>(null);
-
-  const [pendingVideoFile, setPendingVideoFile] = useState<File | null>(null);
-  const [previewVideoUrl, setPreviewVideoUrl] = useState<string | null>(null);
-  const videoInputRef = useRef<HTMLInputElement>(null);
 
   const [deleteTarget, setDeleteTarget] = useState<Property | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -261,43 +205,6 @@ export default function AdminPage() {
     void loadInquiries();
   }, [loadInquiries]);
 
-  useEffect(() => {
-    if (!pendingImageFile) {
-      setPreviewObjectUrl(null);
-      return;
-    }
-    const url = URL.createObjectURL(pendingImageFile);
-    setPreviewObjectUrl(url);
-    return () => {
-      URL.revokeObjectURL(url);
-    };
-  }, [pendingImageFile]);
-
-  useEffect(() => {
-    if (!pendingVideoFile) {
-      setPreviewVideoUrl(null);
-      return;
-    }
-    const url = URL.createObjectURL(pendingVideoFile);
-    setPreviewVideoUrl(url);
-    return () => {
-      URL.revokeObjectURL(url);
-    };
-  }, [pendingVideoFile]);
-
-  useEffect(() => {
-    if (!formOpen) {
-      setPendingImageFile(null);
-      setPendingVideoFile(null);
-      if (imageInputRef.current) {
-        imageInputRef.current.value = '';
-      }
-      if (videoInputRef.current) {
-        videoInputRef.current.value = '';
-      }
-    }
-  }, [formOpen]);
-
   const filteredSorted = useMemo(() => {
     let list = properties.filter((p) =>
       p.title.toLowerCase().includes(search.trim().toLowerCase())
@@ -333,31 +240,35 @@ export default function AdminPage() {
   const activeListings = properties.length;
   const totalInquiries = inquiries.length;
 
-  function validateForm(
-    data: PropertyFormData,
-    pending: { image: boolean; video: boolean }
-  ): Partial<Record<keyof PropertyFormData, string>> {
+  function validateForm(data: PropertyFormData): Partial<Record<keyof PropertyFormData, string>> {
+    const result = propertyFormSchema.safeParse({
+      title: data.title,
+      category: data.category,
+      price: data.price,
+      description: data.description,
+      image_url: data.image_url,
+      video_url: data.video_url,
+    });
+
+    if (result.success) {
+      return {};
+    }
+
+    const fieldErrors = result.error.flatten().fieldErrors;
     const errors: Partial<Record<keyof PropertyFormData, string>> = {};
-    if (!data.title.trim()) {
-      errors.title = 'Title is required';
-    }
-    if (!data.description.trim()) {
-      errors.description = 'Description is required';
-    }
-    if (!data.price.trim()) {
-      errors.price = 'Price is required';
-    } else {
-      const cleaned = data.price.replace(/[₦,\s]/g, '').trim();
-      const n = parseFloat(cleaned);
-      if (Number.isNaN(n) || n < 0) {
-        errors.price = 'Enter a valid price';
+    const keys = [
+      'title',
+      'category',
+      'price',
+      'description',
+      'image_url',
+      'video_url',
+    ] as const;
+    for (const key of keys) {
+      const msgs = fieldErrors[key];
+      if (msgs?.[0]) {
+        errors[key] = msgs[0];
       }
-    }
-    if (!pending.image && !isEmptyOrCloudinaryHttpsUrl(data.image_url)) {
-      errors.image_url = 'Image must be empty or a valid HTTPS Cloudinary URL';
-    }
-    if (!pending.video && !isEmptyOrCloudinaryHttpsUrl(data.video_url)) {
-      errors.video_url = 'Video must be empty or a valid HTTPS Cloudinary URL';
     }
     return errors;
   }
@@ -366,14 +277,6 @@ export default function AdminPage() {
     setEditingId(null);
     setFormData(emptyForm());
     setFormErrors({});
-    setPendingImageFile(null);
-    setPendingVideoFile(null);
-    if (imageInputRef.current) {
-      imageInputRef.current.value = '';
-    }
-    if (videoInputRef.current) {
-      videoInputRef.current.value = '';
-    }
     setFormOpen(true);
   }
 
@@ -388,71 +291,12 @@ export default function AdminPage() {
       video_url: property.video_url,
     });
     setFormErrors({});
-    setPendingImageFile(null);
-    setPendingVideoFile(null);
-    if (imageInputRef.current) {
-      imageInputRef.current.value = '';
-    }
-    if (videoInputRef.current) {
-      videoInputRef.current.value = '';
-    }
     setFormOpen(true);
-  }
-
-  function handleImageFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) {
-      setPendingImageFile(null);
-      return;
-    }
-    const lower = file.name.toLowerCase();
-    if (lower.endsWith('.png') || file.type === 'image/png') {
-      toast.error('PNG files are not allowed. Please use JPEG (.jpg or .jpeg).');
-      e.target.value = '';
-      return;
-    }
-    if (file.type !== 'image/jpeg' || (!lower.endsWith('.jpg') && !lower.endsWith('.jpeg'))) {
-      toast.error('Only JPEG images (.jpg or .jpeg) are allowed.');
-      e.target.value = '';
-      return;
-    }
-    const maxImageBytes = 5 * 1024 * 1024;
-    if (file.size > maxImageBytes) {
-      toast.error('Image must be 5 MB or smaller.');
-      e.target.value = '';
-      return;
-    }
-    setPendingImageFile(file);
-  }
-
-  function handleVideoFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) {
-      setPendingVideoFile(null);
-      return;
-    }
-    const lower = file.name.toLowerCase();
-    const allowedExts = ['.mp4', '.webm', '.mov', '.avi'];
-    if (!allowedExts.some((ext) => lower.endsWith(ext))) {
-      toast.error('Only MP4, WebM, MOV, or AVI video files are allowed.');
-      e.target.value = '';
-      return;
-    }
-    const maxVideoBytes = 50 * 1024 * 1024;
-    if (file.size > maxVideoBytes) {
-      toast.error('Video must be 50 MB or smaller.');
-      e.target.value = '';
-      return;
-    }
-    setPendingVideoFile(file);
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const errors = validateForm(formData, {
-      image: Boolean(pendingImageFile),
-      video: Boolean(pendingVideoFile),
-    });
+    const errors = validateForm(formData);
     setFormErrors(errors);
     if (Object.keys(errors).length > 0) {
       return;
@@ -460,15 +304,11 @@ export default function AdminPage() {
 
     try {
       setSubmitting(true);
-      let imageUrl = formData.image_url.trim();
-      if (pendingImageFile) {
-        imageUrl = await uploadImageToCloudinary(pendingImageFile);
-      }
-      let videoUrl = formData.video_url.trim();
-      if (pendingVideoFile) {
-        videoUrl = await uploadVideoToCloudinary(pendingVideoFile);
-      }
-      const payload: PropertyFormData = { ...formData, image_url: imageUrl, video_url: videoUrl };
+      const payload: PropertyFormData = {
+        ...formData,
+        image_url: formData.image_url.trim(),
+        video_url: formData.video_url.trim(),
+      };
       if (editingId) {
         await updateProperty(editingId, payload);
         toast.success('Property updated successfully');
@@ -942,83 +782,50 @@ export default function AdminPage() {
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="property_image"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Property image (optional)
-                  </label>
                   <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 mb-2">
-                    Files upload directly to Cloudinary (not the database). PNG is not allowed — JPEG
-                    only (.jpg or .jpeg), max 5 MB.
+                    Images upload to Cloudinary when you choose a file (only the URL is stored). JPEG,
+                    PNG, WebP, or GIF, max 5 MB.
                   </p>
-                  <input
-                    ref={imageInputRef}
-                    id="property_image"
-                    type="file"
-                    accept="image/jpeg,.jpg,.jpeg"
-                    onChange={handleImageFileChange}
-                    className="w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#1e3c2c] file:text-white hover:file:bg-[#2d5a3f] file:transition-all"
+                  <FileUpload
+                    type="image"
+                    label="Property image (required)"
+                    required
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    maxSize={5}
                     disabled={submitting}
+                    currentUrl={formData.image_url.trim() || undefined}
+                    onUpload={(url) => setFormData((f) => ({ ...f, image_url: url }))}
+                    onRemove={() => setFormData((f) => ({ ...f, image_url: '' }))}
                   />
                   {formErrors.image_url && (
                     <p className="mt-1 text-sm text-red-600">{formErrors.image_url}</p>
                   )}
-                  {(previewObjectUrl ?? formData.image_url.trim()) && (
-                    <div className="mt-3 relative h-40 w-full max-w-xs rounded-xl overflow-hidden bg-gray-100 border border-gray-200">
-                      {/* eslint-disable-next-line @next/next/no-img-element -- preview / Cloudinary URL */}
-                      <img
-                        src={previewObjectUrl ?? formData.image_url.trim()}
-                        alt="Preview"
-                        className="h-full w-full object-cover"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
-                    </div>
-                  )}
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="property_video"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    <span className="inline-flex items-center gap-1.5">
-                      <Video className="w-4 h-4 text-gray-500" />
-                      Property video (optional)
-                    </span>
-                  </label>
                   <p
                     className="text-sm text-amber-900 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 mb-2"
                     role="status"
                   >
-                    Upload goes to Cloudinary (only the URL is saved in the database). Max{' '}
-                    <span className="font-medium">50 MB</span>. Formats: MP4, WebM, MOV, AVI.
+                    <span className="inline-flex items-center gap-1.5">
+                      <Video className="w-4 h-4 text-gray-500 shrink-0" />
+                      <span>
+                        Videos upload to Cloudinary when you choose a file. Max{' '}
+                        <span className="font-medium">50 MB</span>. Formats: MP4, WebM, MOV.
+                      </span>
+                    </span>
                   </p>
-                  <input
-                    ref={videoInputRef}
-                    id="property_video"
-                    type="file"
-                    accept="video/mp4,video/webm,video/quicktime,video/x-msvideo,.mp4,.webm,.mov,.avi"
-                    onChange={handleVideoFileChange}
-                    className="w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#1e3c2c] file:text-white hover:file:bg-[#2d5a3f] file:transition-all"
+                  <FileUpload
+                    type="video"
+                    label="Property video (optional)"
+                    accept="video/mp4,video/webm,video/quicktime"
+                    maxSize={50}
                     disabled={submitting}
+                    currentUrl={formData.video_url.trim() || undefined}
+                    onUpload={(url) => setFormData((f) => ({ ...f, video_url: url }))}
                   />
                   {formErrors.video_url && (
                     <p className="mt-1 text-sm text-red-600">{formErrors.video_url}</p>
-                  )}
-                  {(previewVideoUrl ?? formData.video_url.trim()) && (
-                    <div className="mt-3 w-full max-w-xs rounded-xl overflow-hidden bg-gray-100 border border-gray-200">
-                      <video
-                        src={previewVideoUrl ?? formData.video_url.trim()}
-                        controls
-                        className="w-full max-h-48 object-contain"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
-                    </div>
                   )}
                 </div>
 

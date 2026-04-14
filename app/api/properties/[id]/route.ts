@@ -1,20 +1,8 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { isEmptyOrCloudinaryHttpsUrl } from '@/lib/cloudinary-url';
 import { isAdminRequestAuthenticated } from '@/lib/admin-auth';
 import { deletePropertyById, updatePropertyFromForm } from '@/lib/properties-queries';
-import type { PropertyCategory } from '@/types';
-
-const CATEGORIES: PropertyCategory[] = [
-  'house for renting',
-  'landed properties for sales',
-  'apartment for renting',
-  'properties for sales',
-];
-
-function isPropertyCategory(value: unknown): value is PropertyCategory {
-  return typeof value === 'string' && (CATEGORIES as readonly string[]).includes(value);
-}
+import { propertyFormSchema } from '@/lib/validation';
 
 export async function PUT(
   request: NextRequest,
@@ -48,40 +36,28 @@ export async function PUT(
       );
     }
 
-    const title = typeof body.title === 'string' ? body.title.trim() : '';
-    const description = typeof body.description === 'string' ? body.description.trim() : '';
-    const price = typeof body.price === 'string' ? body.price.trim() : '';
-    const image_url = typeof body.image_url === 'string' ? body.image_url : '';
-    const video_url = typeof body.video_url === 'string' ? body.video_url : '';
+    const parsed = propertyFormSchema.safeParse({
+      title: typeof body.title === 'string' ? body.title : '',
+      category: body.category,
+      price: typeof body.price === 'string' ? body.price : '',
+      description: typeof body.description === 'string' ? body.description : '',
+      image_url: typeof body.image_url === 'string' ? body.image_url : '',
+      video_url: typeof body.video_url === 'string' ? body.video_url : '',
+    });
 
-    if (!isEmptyOrCloudinaryHttpsUrl(image_url) || !isEmptyOrCloudinaryHttpsUrl(video_url)) {
+    if (!parsed.success) {
+      const first = parsed.error.issues[0];
       return NextResponse.json(
-        {
-          success: false,
-          error:
-            'Image and video fields must be empty or valid HTTPS Cloudinary URLs (res.cloudinary.com/.../upload/...)',
-        },
+        { success: false, error: first?.message ?? 'Invalid property data' },
         { status: 400 }
       );
     }
 
-    if (!title || !description || !price) {
-      return NextResponse.json(
-        { success: false, error: 'Title, description, and price are required' },
-        { status: 400 }
-      );
-    }
-
-    if (!isPropertyCategory(body.category)) {
-      return NextResponse.json(
-        { success: false, error: 'Valid category is required' },
-        { status: 400 }
-      );
-    }
+    const { title, category, price, description, image_url, video_url } = parsed.data;
 
     const property = await updatePropertyFromForm(id, {
       title,
-      category: body.category,
+      category,
       price,
       description,
       image_url,
@@ -97,6 +73,9 @@ export async function PUT(
     console.error('PUT /api/properties/[id]:', error);
     if (error instanceof Error && error.message === 'Invalid price') {
       return NextResponse.json({ success: false, error: 'Invalid price' }, { status: 400 });
+    }
+    if (error instanceof Error && error.message === 'Image is required') {
+      return NextResponse.json({ success: false, error: 'Image is required' }, { status: 400 });
     }
     return NextResponse.json(
       { success: false, error: 'Failed to update property' },

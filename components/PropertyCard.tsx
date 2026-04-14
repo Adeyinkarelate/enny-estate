@@ -1,7 +1,9 @@
 'use client';
 
-import { MapPin, Eye } from 'lucide-react';
+import { useCallback, useState } from 'react';
+import { MapPin, Eye, Video } from 'lucide-react';
 import type { Property, PropertyCategory } from '@/types';
+import PropertyDetailModal from '@/components/PropertyDetailModal';
 
 interface PropertyCardProps {
   property: Property;
@@ -23,63 +25,82 @@ const categoryLabels: Record<PropertyCategory, string> = {
 };
 
 export default function PropertyCard({ property, onReadMore }: PropertyCardProps) {
-  const handleReadMore = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const hasVideo = Boolean(property.video_url && property.video_url.trim() !== '');
+
+  const closeModal = useCallback(() => {
+    setIsModalOpen(false);
+  }, []);
+
+  const openDetails = () => {
     if (onReadMore) {
       onReadMore(property);
     } else {
-      alert(
-        `🏠 ${property.title}\n\n` +
-          `📌 ${categoryLabels[property.category]}\n` +
-          `💰 ${property.price}\n\n` +
-          `📝 ${property.description}\n\n` +
-          `📞 Contact: +234 902 767 7640 to schedule a viewing.`
-      );
+      setIsModalOpen(true);
     }
   };
 
   return (
-    <div className="group bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
-      {/* Image Container */}
-      <div className="relative h-56 overflow-hidden">
-        <img
-          src={
-            property.image_url ||
-            'https://placehold.co/600x400/e2e8f0/1e3c2c?text=Property+Image'
-          }
-          alt={property.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-        />
-        <div className="absolute top-3 left-3">
-          <span
-            className={`px-3 py-1 rounded-full text-xs font-semibold ${categoryColors[property.category]}`}
-          >
-            {categoryLabels[property.category]}
-          </span>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="p-5">
-        <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-1">{property.title}</h3>
-
-        <div className="flex items-center text-gray-500 text-sm mb-3">
-          <MapPin size={14} className="mr-1 shrink-0" aria-hidden="true" />
-          <span>Lagos, Nigeria</span>
-        </div>
-
-        <div className="text-2xl font-bold text-[#1e3c2c] mb-3">{property.price}</div>
-
-        <p className="text-gray-600 text-sm mb-4 line-clamp-2">{property.description}</p>
-
+    <>
+      <div className="group bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
         <button
           type="button"
-          onClick={handleReadMore}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-full font-semibold bg-[#f3f4f6] text-[#1e3c2c] hover:bg-[#1e3c2c] hover:text-white transition-all duration-300"
+          onClick={openDetails}
+          className="relative h-56 w-full overflow-hidden text-left cursor-pointer"
+          aria-label={`View details for ${property.title}`}
         >
-          <Eye size={18} aria-hidden="true" />
-          Read More
+          {/* eslint-disable-next-line @next/next/no-img-element -- dynamic property URL from API */}
+          <img
+            src={
+              property.image_url ||
+              'https://placehold.co/600x400/e2e8f0/1e3c2c?text=Property+Image'
+            }
+            alt={property.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          />
+          <div className="absolute top-3 left-3">
+            <span
+              className={`px-3 py-1 rounded-full text-xs font-semibold ${categoryColors[property.category]}`}
+            >
+              {categoryLabels[property.category]}
+            </span>
+          </div>
+          {hasVideo && (
+            <div className="absolute top-3 right-3">
+              <span className="px-2 py-1 rounded-full text-xs font-semibold bg-black/70 text-white backdrop-blur-sm flex items-center gap-1">
+                <Video size={12} aria-hidden="true" />
+                Video Tour
+              </span>
+            </div>
+          )}
         </button>
+
+        <div className="p-5">
+          <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-1">{property.title}</h3>
+
+          <div className="flex items-center text-gray-500 text-sm mb-3">
+            <MapPin size={14} className="mr-1 shrink-0" aria-hidden="true" />
+            <span>Lagos, Nigeria</span>
+          </div>
+
+          <div className="text-2xl font-bold text-green-900 mb-3">{property.price}</div>
+
+          <p className="text-gray-600 text-sm mb-4 line-clamp-2">{property.description}</p>
+
+          <button
+            type="button"
+            onClick={openDetails}
+            className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold bg-gray-100 text-green-900 hover:bg-green-900 hover:text-white transition-all duration-300"
+          >
+            <Eye size={18} aria-hidden="true" />
+            Read More
+          </button>
+        </div>
       </div>
-    </div>
+
+      {!onReadMore && (
+        <PropertyDetailModal property={property} isOpen={isModalOpen} onClose={closeModal} />
+      )}
+    </>
   );
 }

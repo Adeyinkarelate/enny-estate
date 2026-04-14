@@ -20,3 +20,12 @@ export function isEmptyOrCloudinaryHttpsUrl(url: string): boolean {
     return false;
   }
 }
+
+/** Non-empty string that passes Cloudinary HTTPS upload URL rules (required property image). */
+export function isNonEmptyCloudinaryHttpsUrl(url: string): boolean {
+  const trimmed = url.trim();
+  if (trimmed === '') {
+    return false;
+  }
+  return isEmptyOrCloudinaryHttpsUrl(trimmed);
+}

@@ -45,6 +45,11 @@ export interface ApiResponse<T = unknown> {
   error?: string;
 }
 
+/** Admin media upload success payload */
+export interface AdminMediaUrlPayload {
+  url: string;
+}
+
 export interface ContactFormState {
   name: string;
   email: string;

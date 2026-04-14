@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Star, Quote } from 'lucide-react';
 import SectionHeader from '@/components/ui/SectionHeader';
@@ -56,9 +57,11 @@ export default function Testimonials() {
             <Quote className="absolute top-4 right-4 text-gray-200 w-8 h-8" aria-hidden="true" />
 
             <div className="flex items-center space-x-4 mb-4">
-              <img
+              <Image
                 src={testimonial.image}
                 alt={testimonial.name}
+                width={56}
+                height={56}
                 className="w-14 h-14 rounded-full object-cover"
               />
               <div>

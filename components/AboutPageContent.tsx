@@ -60,20 +60,20 @@ const TEAM: AboutTeamMember[] = [
   {
     name: 'Eniola Adeyemi',
     role: 'Founder & Lead Broker',
-    imageUrl: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&q=80',
-    imageAlt: 'Eniola Adeyemi, Founder and Lead Broker',
+    imageUrl: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&q=80',
+    imageAlt: 'Modern two-story residential home with landscaped front',
   },
   {
     name: 'Chioma Okafor',
     role: 'Head of Sales',
-    imageUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80',
-    imageAlt: 'Chioma Okafor, Head of Sales',
+    imageUrl: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=400&q=80',
+    imageAlt: 'Contemporary house exterior with large windows',
   },
   {
     name: 'Tunde Bakare',
     role: 'Property Consultant',
-    imageUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&q=80',
-    imageAlt: 'Tunde Bakare, Property Consultant',
+    imageUrl: 'https://images.unsplash.com/photo-1600566752355-35792bedcfea?w=400&q=80',
+    imageAlt: 'Luxury villa-style property at dusk',
   },
 ];
 
@@ -132,8 +132,8 @@ export default function AboutPageContent() {
               <div className="absolute -inset-4 bg-gradient-to-r from-[#d4af37]/20 to-transparent rounded-2xl blur-2xl" aria-hidden="true" />
               <div className="relative bg-[#1e3c2c] rounded-2xl overflow-hidden shadow-2xl">
                 <Image
-                  src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=600&h=500&fit=crop"
-                  alt="Enny Estate leadership"
+                  src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&h=500&fit=crop"
+                  alt="Spacious modern family home with pool and patio"
                   width={600}
                   height={500}
                   className="w-full h-[500px] object-cover"
