@@ -1,10 +1,11 @@
 'use client';
 
 import { useCallback, useEffect, useState, type ReactElement } from 'react';
-import { X, MapPin, Phone, Mail, Calendar, Share2, Video } from 'lucide-react';
+import { X, MapPin, Phone, Mail, Calendar, Share2, Video, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import type { Property, PropertyCategory } from '@/types';
+import { SITE_PUBLIC_EMAIL, whatsAppChatUrl } from '@/lib/site-contact';
 
 interface PropertyDetailModalProps {
   property: Property | null;
@@ -64,8 +65,12 @@ export default function PropertyDetailModal({
   const shareLinks = {
     facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
     twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
-    whatsapp: `https://wa.me/?text=${encodeURIComponent(`${shareText} - ${shareUrl}`)}`,
+    whatsapp: whatsAppChatUrl(`${shareText} - ${shareUrl}`),
   };
+
+  const ceoWhatsAppInquiryHref = whatsAppChatUrl(
+    `Hi, I'm interested in "${property.title}" on Enny Estate.`
+  );
 
   const hasVideo = Boolean(property.video_url && property.video_url.trim() !== '');
 
@@ -228,33 +233,54 @@ export default function PropertyDetailModal({
                       <h3 className="text-lg font-semibold text-gray-900 mb-4">
                         Interested in this property?
                       </h3>
-                      <div className="flex flex-col sm:flex-row gap-4">
+                      <div className="flex flex-col gap-4">
                         <Link
                           href="/contact"
                           onClick={handleClose}
-                          className="flex-1 flex items-center justify-center gap-2 bg-green-900 text-white py-3 rounded-xl font-semibold hover:bg-green-800 transition-all duration-300 hover:scale-[1.02]"
+                          className="w-full flex items-center justify-center gap-2 bg-green-900 text-white py-3 rounded-xl font-semibold hover:bg-green-800 transition-all duration-300 hover:scale-[1.02]"
                         >
                           <Calendar size={18} aria-hidden="true" />
                           Schedule a Tour
                         </Link>
-                        <a
-                          href="tel:+2349027677640"
-                          className="flex-1 flex items-center justify-center gap-2 border-2 border-green-900 text-green-900 py-3 rounded-xl font-semibold hover:bg-green-900 hover:text-white transition-all duration-300"
-                        >
-                          <Phone size={18} aria-hidden="true" />
-                          Call Now
-                        </a>
+                        <div className="flex flex-col sm:flex-row gap-4">
+                          <a
+                            href="tel:+2349027677640"
+                            className="flex-1 flex items-center justify-center gap-2 border-2 border-green-900 text-green-900 py-3 rounded-xl font-semibold hover:bg-green-900 hover:text-white transition-all duration-300"
+                          >
+                            <Phone size={18} aria-hidden="true" />
+                            Call Now
+                          </a>
+                          <a
+                            href={ceoWhatsAppInquiryHref}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1 flex items-center justify-center gap-2 bg-[#25d366] text-white py-3 rounded-xl font-semibold hover:opacity-95 transition-all duration-300 hover:scale-[1.02]"
+                          >
+                            <MessageCircle size={18} aria-hidden="true" />
+                            WhatsApp CEO
+                          </a>
+                        </div>
                       </div>
 
                       <div className="mt-4 p-4 bg-gray-50 rounded-xl">
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 text-gray-600">
                           <div className="flex items-center gap-2">
                             <Phone size={16} className="text-green-900 shrink-0" aria-hidden="true" />
-                            <span>+234 902 767 7640</span>
+                            <a
+                              href="tel:+2349027677640"
+                              className="hover:text-green-900 underline-offset-2 hover:underline focus:outline-none focus:ring-2 focus:ring-green-900 rounded"
+                            >
+                              +234 902 767 7640
+                            </a>
                           </div>
                           <div className="flex items-center gap-2">
                             <Mail size={16} className="text-green-900 shrink-0" aria-hidden="true" />
-                            <span>hello@ennyestate.ng</span>
+                            <a
+                              href={`mailto:${SITE_PUBLIC_EMAIL}`}
+                              className="hover:text-green-900 underline-offset-2 hover:underline focus:outline-none focus:ring-2 focus:ring-green-900 rounded break-all"
+                            >
+                              {SITE_PUBLIC_EMAIL}
+                            </a>
                           </div>
                         </div>
                       </div>

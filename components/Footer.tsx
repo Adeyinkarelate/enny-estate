@@ -1,7 +1,9 @@
 import { Phone, MapPin, Mail, Share2, MessageCircle, Camera } from 'lucide-react';
+import { SITE_PUBLIC_EMAIL, whatsAppChatUrl } from '@/lib/site-contact';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const ceoWhatsAppHref = whatsAppChatUrl();
 
   return (
     <footer className="bg-[#0a1a14] text-gray-300 mt-auto" role="contentinfo">
@@ -30,10 +32,21 @@ export default function Footer() {
               <li className="flex items-center space-x-3">
                 <Mail size={18} className="text-[#d4af37] shrink-0" aria-hidden="true" />
                 <a
-                  href="mailto:hello@ennyestate.ng"
+                  href={`mailto:${SITE_PUBLIC_EMAIL}`}
                   className="text-sm hover:text-white focus:outline-none focus:ring-2 focus:ring-[#d4af37] rounded"
                 >
-                  hello@ennyestate.ng
+                  {SITE_PUBLIC_EMAIL}
+                </a>
+              </li>
+              <li className="flex items-center space-x-3">
+                <MessageCircle size={18} className="text-[#d4af37] shrink-0" aria-hidden="true" />
+                <a
+                  href={ceoWhatsAppHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm hover:text-white focus:outline-none focus:ring-2 focus:ring-[#d4af37] rounded"
+                >
+                  WhatsApp (+234 902 767 7640)
                 </a>
               </li>
               <li className="flex items-center space-x-3">
@@ -57,9 +70,11 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="#"
+                  href={ceoWhatsAppHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="inline-flex p-2 bg-white/10 rounded-full hover:bg-[#d4af37] hover:text-[#0a1a14] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#d4af37]"
-                  aria-label="Follow us on Twitter"
+                  aria-label="Chat with our CEO on WhatsApp"
                 >
                   <MessageCircle size={20} aria-hidden="true" />
                 </a>

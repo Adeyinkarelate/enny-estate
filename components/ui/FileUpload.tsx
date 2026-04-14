@@ -66,7 +66,7 @@ export default function FileUpload({
     formData.append('file', file);
     formData.append('type', type);
 
-    const response = await fetch('/api/admin/upload', {
+    const response = await fetch('/api/ennyadmin/upload', {
       method: 'POST',
       body: formData,
       credentials: 'include',

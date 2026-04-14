@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     try {
       formData = await request.formData();
     } catch (error) {
-      console.error('POST /api/admin/upload: formData parse failed:', error);
+      console.error('POST /api/ennyadmin/upload: formData parse failed:', error);
       return json(
         {
           success: false,
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
         Readable.from(buffer).pipe(uploadStream);
       });
     } catch (error) {
-      console.error('POST /api/admin/upload: Cloudinary upload error:', error);
+      console.error('POST /api/ennyadmin/upload: Cloudinary upload error:', error);
       return json({ success: false, error: 'Failed to upload file' }, 500);
     }
 
@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
 
     return json({ success: true, secure_url: secureUrl, public_id: publicId }, 200);
   } catch (error) {
-    console.error('POST /api/admin/upload:', error);
+    console.error('POST /api/ennyadmin/upload:', error);
     return json({ success: false, error: 'Failed to upload file' }, 500);
   }
 }

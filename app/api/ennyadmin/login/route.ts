@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
   try {
     const adminPassword = process.env.ADMIN_PASSWORD;
     if (!adminPassword || typeof adminPassword !== 'string') {
-      console.error('POST /api/admin/login: ADMIN_PASSWORD not configured');
+      console.error('POST /api/ennyadmin/login: ADMIN_PASSWORD not configured');
       return NextResponse.json(
         { success: false, error: 'Server configuration error' },
         { status: 500 }
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
     });
     return response;
   } catch (error) {
-    console.error('POST /api/admin/login:', error);
+    console.error('POST /api/ennyadmin/login:', error);
     return NextResponse.json(
       { success: false, error: 'Login failed' },
       { status: 500 }

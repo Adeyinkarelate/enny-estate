@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
-import { Menu, X, Home, Info, Building2, Phone, Shield } from 'lucide-react';
+import { Menu, X, Home, Info, Building2, Phone } from 'lucide-react';
 import type { NavLinkItem } from '@/types';
 
 const navLinks: NavLinkItem[] = [
@@ -11,7 +11,6 @@ const navLinks: NavLinkItem[] = [
   { href: '/about', label: 'About', icon: Info },
   { href: '/properties', label: 'Properties', icon: Building2 },
   { href: '/contact', label: 'Contact', icon: Phone },
-  { href: '/admin', label: 'Admin', icon: Shield },
 ];
 
 function isPathActive(pathname: string, path: string): boolean {

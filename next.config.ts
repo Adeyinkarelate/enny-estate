@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   experimental: {
     // Must exceed max admin video upload (50 MB) plus multipart encoding overhead.
     // Routes matched by middleware buffer the body; too low a limit truncates multipart
-    // data and causes request.formData() to throw ("Invalid form data" in /api/admin/media).
+    // data and causes request.formData() to throw ("Invalid form data" in /api/ennyadmin/media).
     proxyClientMaxBodySize: "60mb",
   },
   images: {

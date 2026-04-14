@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const publicAdminRoutes = ['/admin/login', '/api/admin/login'];
+const publicAdminRoutes = ['/ennyadmin/login', '/api/ennyadmin/login'];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const isAdminRoute = pathname.startsWith('/admin');
-  const isApiAdminRoute = pathname.startsWith('/api/admin');
+  const isAdminRoute = pathname.startsWith('/ennyadmin');
+  const isApiAdminRoute = pathname.startsWith('/api/ennyadmin');
 
   if (publicAdminRoutes.some((route) => pathname.startsWith(route))) {
     return NextResponse.next();
@@ -19,7 +19,7 @@ export function proxy(request: NextRequest) {
 
     if (!isAuthenticated) {
       if (isAdminRoute) {
-        const loginUrl = new URL('/admin/login', request.url);
+        const loginUrl = new URL('/ennyadmin/login', request.url);
         loginUrl.searchParams.set('redirect', pathname);
         return NextResponse.redirect(loginUrl);
       }
@@ -29,11 +29,16 @@ export function proxy(request: NextRequest) {
         headers: { 'Content-Type': 'application/json' },
       });
     }
+
+    const response = NextResponse.next();
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+    response.headers.set('Cache-Control', 'no-store, must-revalidate');
+    return response;
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/api/admin/:path*'],
+  matcher: ['/ennyadmin/:path*', '/api/ennyadmin/:path*'],
 };
