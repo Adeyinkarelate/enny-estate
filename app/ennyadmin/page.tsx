@@ -170,6 +170,9 @@ export default function AdminPage() {
     {}
   );
   const [submitting, setSubmitting] = useState(false);
+  /** True while Cloudinary upload is in progress — preview can show before formData has the URL */
+  const [imageUploading, setImageUploading] = useState(false);
+  const [videoUploading, setVideoUploading] = useState(false);
 
   const [deleteTarget, setDeleteTarget] = useState<Property | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -278,6 +281,8 @@ export default function AdminPage() {
     setEditingId(null);
     setFormData(emptyForm());
     setFormErrors({});
+    setImageUploading(false);
+    setVideoUploading(false);
     setFormOpen(true);
   }
 
@@ -292,6 +297,8 @@ export default function AdminPage() {
       video_url: property.video_url,
     });
     setFormErrors({});
+    setImageUploading(false);
+    setVideoUploading(false);
     setFormOpen(true);
   }
 
@@ -674,7 +681,9 @@ export default function AdminPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => !submitting && setFormOpen(false)}
+            onClick={() =>
+              !submitting && !imageUploading && !videoUploading && setFormOpen(false)
+            }
           >
             <motion.div
               role="dialog"
@@ -693,7 +702,9 @@ export default function AdminPage() {
                 </h2>
                 <button
                   type="button"
-                  onClick={() => !submitting && setFormOpen(false)}
+                  onClick={() =>
+                    !submitting && !imageUploading && !videoUploading && setFormOpen(false)
+                  }
                   className="p-2 rounded-full hover:bg-gray-100 text-gray-600"
                   aria-label="Close"
                 >
@@ -795,7 +806,17 @@ export default function AdminPage() {
                     maxSize={5}
                     disabled={submitting}
                     currentUrl={formData.image_url.trim() || undefined}
-                    onUpload={(url) => setFormData((f) => ({ ...f, image_url: url }))}
+                    onUploadingChange={setImageUploading}
+                    onUpload={(url) => {
+                      setFormData((f) => ({ ...f, image_url: url }));
+                      if (url.trim()) {
+                        setFormErrors((prev) => {
+                          const next = { ...prev };
+                          delete next.image_url;
+                          return next;
+                        });
+                      }
+                    }}
                     onRemove={() => setFormData((f) => ({ ...f, image_url: '' }))}
                   />
                   {formErrors.image_url && (
@@ -823,6 +844,7 @@ export default function AdminPage() {
                     maxSize={50}
                     disabled={submitting}
                     currentUrl={formData.video_url.trim() || undefined}
+                    onUploadingChange={setVideoUploading}
                     onUpload={(url) => setFormData((f) => ({ ...f, video_url: url }))}
                   />
                   {formErrors.video_url && (
@@ -833,15 +855,20 @@ export default function AdminPage() {
                 <div className="flex flex-wrap gap-3 pt-4">
                   <button
                     type="submit"
-                    disabled={submitting}
+                    disabled={submitting || imageUploading || videoUploading}
                     className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold transition-all bg-[#1e3c2c] text-white hover:bg-[#2d5a3f] disabled:opacity-60"
                   >
                     {submitting && <Loader2 className="w-5 h-5 animate-spin" />}
                     {editingId ? 'Update' : 'Create'}
                   </button>
+                  {(imageUploading || videoUploading) && (
+                    <p className="text-sm text-amber-800 self-center" role="status">
+                      Finish uploading media before saving.
+                    </p>
+                  )}
                   <button
                     type="button"
-                    disabled={submitting}
+                    disabled={submitting || imageUploading || videoUploading}
                     onClick={() => setFormOpen(false)}
                     className="px-6 py-3 rounded-full font-semibold border border-gray-200 bg-white hover:bg-gray-50 transition-all"
                   >

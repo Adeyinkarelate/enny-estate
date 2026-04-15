@@ -6,6 +6,8 @@ import { X, Video, Image as ImageIcon, Loader2 } from 'lucide-react';
 interface FileUploadProps {
   onUpload: (url: string) => void;
   onRemove?: () => void;
+  /** Called when a file is being uploaded so parents can block submit until the URL is saved */
+  onUploadingChange?: (uploading: boolean) => void;
   accept: string;
   maxSize: number;
   label: string;
@@ -19,6 +21,7 @@ interface FileUploadProps {
 export default function FileUpload({
   onUpload,
   onRemove,
+  onUploadingChange,
   accept,
   maxSize,
   label,
@@ -31,10 +34,16 @@ export default function FileUpload({
   const [error, setError] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(currentUrl || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const onUploadingChangeRef = useRef(onUploadingChange);
+  onUploadingChangeRef.current = onUploadingChange;
 
   useEffect(() => {
     setPreviewUrl(currentUrl || null);
   }, [currentUrl]);
+
+  useEffect(() => {
+    onUploadingChangeRef.current?.(isUploading);
+  }, [isUploading]);
 
   const validateFile = (file: File): boolean => {
     setError(null);
@@ -137,10 +146,19 @@ export default function FileUpload({
           ) : (
             <video src={previewUrl} controls className="w-full max-h-64" />
           )}
+          {isUploading && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/50 text-white">
+              <Loader2 className="w-10 h-10 animate-spin" aria-hidden />
+              <span className="text-sm font-medium">Uploading to Cloudinary…</span>
+              <span className="text-xs text-white/90 px-2 text-center">
+                Wait until this finishes before saving the property.
+              </span>
+            </div>
+          )}
           <button
             type="button"
             onClick={handleRemove}
-            disabled={disabled}
+            disabled={disabled || isUploading}
             className="absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full hover:bg-red-700 transition disabled:opacity-50"
           >
             <X size={16} />
