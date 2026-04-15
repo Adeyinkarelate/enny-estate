@@ -15,6 +15,7 @@ const categoryColors: Record<PropertyCategory, string> = {
   'landed properties for sales': 'bg-green-100 text-green-800',
   'apartment for renting': 'bg-purple-100 text-purple-800',
   'properties for sales': 'bg-yellow-100 text-yellow-800',
+  'lease and property management': 'bg-teal-100 text-teal-800',
 };
 
 const categoryLabels: Record<PropertyCategory, string> = {
@@ -22,6 +23,7 @@ const categoryLabels: Record<PropertyCategory, string> = {
   'landed properties for sales': '🌿 Land Sale',
   'apartment for renting': '🏢 Apartment Rent',
   'properties for sales': '🏷️ Properties for Sale',
+  'lease and property management': '📋 Lease & Property Mgmt',
 };
 
 export default function PropertyCard({ property, onReadMore }: PropertyCardProps) {

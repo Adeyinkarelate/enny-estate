@@ -7,6 +7,7 @@ const PROPERTY_CATEGORIES: [PropertyCategory, ...PropertyCategory[]] = [
   'landed properties for sales',
   'apartment for renting',
   'properties for sales',
+  'lease and property management',
 ];
 
 export const propertyFormSchema = z.object({

@@ -9,7 +9,12 @@ export interface NavLinkItem {
 export interface Property {
   id: string;
   title: string;
-  category: 'house for renting' | 'landed properties for sales' | 'apartment for renting' | 'properties for sales';
+  category:
+    | 'house for renting'
+    | 'landed properties for sales'
+    | 'apartment for renting'
+    | 'properties for sales'
+    | 'lease and property management';
   price: string;
   description: string;
   image_url: string;

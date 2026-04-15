@@ -16,6 +16,7 @@ const filterOptions: { label: string; value: PropertyCategory | 'all' }[] = [
   { label: '🌿 Land for Sale', value: 'landed properties for sales' },
   { label: '🏢 Apartments for Rent', value: 'apartment for renting' },
   { label: '🏷️ Properties for Sale', value: 'properties for sales' },
+  { label: '📋 Lease & Property Mgmt', value: 'lease and property management' },
 ];
 
 export default function PropertyGrid({

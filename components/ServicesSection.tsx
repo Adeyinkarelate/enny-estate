@@ -2,7 +2,15 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Home, Landmark, Building2, ArrowRight } from 'lucide-react';
+import {
+  Home,
+  Landmark,
+  Building2,
+  ClipboardList,
+  FileSignature,
+  MessageCircle,
+  ArrowRight,
+} from 'lucide-react';
 import { fadeUp, staggerContainer } from '@/lib/animations';
 
 export interface ServicesSectionProps {
@@ -31,6 +39,27 @@ const services = [
     description: 'Modern flats, serviced apartments, and luxury penthouses.',
     color: 'bg-[#1e3c2c]/10 text-[#1e3c2c]',
   },
+  {
+    icon: ClipboardList,
+    title: 'Property Management',
+    description:
+      'End-to-end oversight of rentals—tenant relations, maintenance, and compliance so owners can invest with confidence.',
+    color: 'bg-[#d4af37]/15 text-[#1e3c2c]',
+  },
+  {
+    icon: FileSignature,
+    title: 'Lease',
+    description:
+      'Residential and commercial lease agreements tailored to your term, budget, and location across Lagos and Abuja.',
+    color: 'bg-[#1e3c2c]/10 text-[#1e3c2c]',
+  },
+  {
+    icon: MessageCircle,
+    title: 'Consultation',
+    description:
+      'One-on-one sessions on buying, selling, investing, or renting—market insight and a clear plan before you commit.',
+    color: 'bg-[#d4af37]/15 text-[#1e3c2c]',
+  },
 ];
 
 export default function ServicesSection({
@@ -41,14 +70,14 @@ export default function ServicesSection({
   return (
     <div className="w-full">
       <motion.div
-        className="grid grid-cols-1 md:grid-cols-3 gap-6"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: '-60px' }}
         variants={staggerContainer}
       >
         {showHeading ? (
-          <motion.div className="text-center mb-4 md:col-span-3 md:mb-6" variants={fadeUp}>
+          <motion.div className="text-center mb-4 sm:col-span-2 lg:col-span-3 lg:mb-6" variants={fadeUp}>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3 font-heading">{title}</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">{subtitle}</p>
           </motion.div>

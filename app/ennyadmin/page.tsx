@@ -27,6 +27,7 @@ const CATEGORIES: { value: PropertyCategory; label: string }[] = [
   { value: 'landed properties for sales', label: 'Landed properties for sales' },
   { value: 'apartment for renting', label: 'Apartment for renting' },
   { value: 'properties for sales', label: 'Properties for sales' },
+  { value: 'lease and property management', label: 'Lease and property management' },
 ];
 
 const PAGE_SIZE = 10;

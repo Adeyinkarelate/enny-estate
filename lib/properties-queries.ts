@@ -1,5 +1,6 @@
 import { desc, eq } from 'drizzle-orm';
 import { db } from '@/lib/db';
+import { derivePropertyMediaUrls } from '@/lib/property-media';
 import { properties as propertiesTable } from '@/lib/schema';
 import type { Property as DbProperty } from '@/lib/schema';
 import type { Property, PropertyCategory } from '@/types';
@@ -12,6 +13,8 @@ function mapDbPropertyToProperty(row: DbProperty): Property {
     category = 'apartment for renting';
   } else if (row.type === 'commercial' && row.status === 'for_sale') {
     category = 'properties for sales';
+  } else if (row.type === 'commercial' && row.status === 'for_rent') {
+    category = 'lease and property management';
   } else {
     category = 'house for renting';
   }
@@ -21,8 +24,10 @@ function mapDbPropertyToProperty(row: DbProperty): Property {
     maximumFractionDigits: 0,
   })}`;
 
-  const image_url = row.images?.[0] ?? '';
-  const video_url = row.videos?.[0] ?? '';
+  const { image_url, video_url } = derivePropertyMediaUrls({
+    images: row.images,
+    videos: row.videos,
+  });
 
   return {
     id: String(row.id),
@@ -76,6 +81,9 @@ function categoryToDbFields(category: PropertyCategory): {
   }
   if (category === 'properties for sales') {
     return { type: 'commercial', status: 'for_sale' };
+  }
+  if (category === 'lease and property management') {
+    return { type: 'commercial', status: 'for_rent' };
   }
   return { type: 'house', status: 'for_rent' };
 }

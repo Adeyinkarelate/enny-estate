@@ -4,8 +4,12 @@ import { useCallback, useEffect, useState, type ReactElement } from 'react';
 import { X, MapPin, Phone, Mail, Calendar, Share2, Video, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import { cloudinaryHtml5VideoUrl } from '@/lib/property-media';
 import type { Property, PropertyCategory } from '@/types';
 import { SITE_PUBLIC_EMAIL, whatsAppChatUrl } from '@/lib/site-contact';
+
+const PLACEHOLDER_IMAGE =
+  'https://placehold.co/1200x800/e2e8f0/1e3c2c?text=Property+Image';
 
 interface PropertyDetailModalProps {
   property: Property | null;
@@ -18,6 +22,7 @@ const categoryLabels: Record<PropertyCategory, string> = {
   'landed properties for sales': '🌿 Land for Sale',
   'apartment for renting': '🏢 Apartment for Rent',
   'properties for sales': '🏷️ Property for Sale',
+  'lease and property management': '📋 Lease & Property Management',
 };
 
 const categoryColors: Record<PropertyCategory, string> = {
@@ -25,6 +30,7 @@ const categoryColors: Record<PropertyCategory, string> = {
   'landed properties for sales': 'bg-green-100 text-green-800',
   'apartment for renting': 'bg-purple-100 text-purple-800',
   'properties for sales': 'bg-yellow-100 text-yellow-800',
+  'lease and property management': 'bg-teal-100 text-teal-800',
 };
 
 export default function PropertyDetailModal({
@@ -73,6 +79,8 @@ export default function PropertyDetailModal({
   );
 
   const hasVideo = Boolean(property.video_url && property.video_url.trim() !== '');
+  const displayImageUrl = property.image_url?.trim() || PLACEHOLDER_IMAGE;
+  const videoPlaybackUrl = hasVideo ? cloudinaryHtml5VideoUrl(property.video_url) : '';
 
   return (
     <AnimatePresence>
@@ -121,7 +129,7 @@ export default function PropertyDetailModal({
               <div className="relative h-64 sm:h-80 md:h-96 bg-gray-100">
                 {/* eslint-disable-next-line @next/next/no-img-element -- dynamic property URL from API */}
                 <img
-                  src={property.image_url}
+                  src={displayImageUrl}
                   alt={property.title}
                   className="w-full h-full object-cover"
                 />
@@ -325,11 +333,13 @@ export default function PropertyDetailModal({
                   <div className="space-y-4">
                     <div className="relative rounded-xl overflow-hidden bg-black">
                       <video
-                        src={property.video_url}
+                        key={videoPlaybackUrl}
+                        src={videoPlaybackUrl}
                         controls
                         playsInline
+                        preload="metadata"
                         className="w-full rounded-xl max-h-[60vh]"
-                        poster={property.image_url}
+                        poster={displayImageUrl}
                       />
                     </div>
                     <p className="text-sm text-gray-500 text-center">
