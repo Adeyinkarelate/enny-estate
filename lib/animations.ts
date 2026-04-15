@@ -59,3 +59,34 @@ export const zoomIn: Variants = {
     transition: { duration: 0.5 },
   },
 };
+
+/** Home hero — snappier easing, slightly tighter stagger */
+export const heroStagger: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.11,
+      delayChildren: 0.08,
+    },
+  },
+};
+
+export const heroFadeUp: Variants = {
+  hidden: { opacity: 0, y: 28 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
+  },
+};
+
+export const heroScaleIn: Variants = {
+  hidden: { opacity: 0, scale: 0.94, y: 16 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: { duration: 0.75, ease: [0.22, 1, 0.36, 1], delay: 0.12 },
+  },
+};
